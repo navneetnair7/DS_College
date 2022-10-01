@@ -1,104 +1,220 @@
 #include <stdio.h>
 #include <stdlib.h>
-
 struct Node{
-    int data1;
-    int data2;
-    int ind;
-    struct Node *next;
+ int data;
+ struct Node *next;
+ struct Node *prev;
 };
-
-struct Node * head = NULL;
-struct Node * tail = NULL;
-int ovr_ctr;
-
-void insert(int p, int d){
-    struct Node * new = (struct Node *)malloc(sizeof(struct Node));
-    new -> data1 = p;
-    new -> data2 = d;
-    new -> next = NULL;
-    if(head == NULL){
-        head = new;
-        head->next= head;  
-        tail=head;
-        tail->ind=ovr_ctr;
-        ovr_ctr++;
-    }
-    else{
-        tail->next=new;
-        new->next=head;
-        tail=new;
-        tail->ind=ovr_ctr;
-        ovr_ctr++;
-    }
+typedef struct Node node;
+node *head = NULL;
+node *head2 = NULL;
+void insert(int val){
+ node *new = (node *)malloc(sizeof(node));
+ if(head == NULL){
+ new -> data = val;
+ head = new;
+ new -> next = NULL;
+ new -> prev = NULL;
+ }
+ else{
+ new -> data = val;
+ node * temp = head;
+ while(temp -> next != NULL){
+ temp = temp -> next;
+ }
+ temp -> next = new;
+ new -> prev = temp;
+ new -> next = NULL;
+ }
 }
-
+void insert2(int val){
+ node *new = (node *)malloc(sizeof(node));
+ if(head2 == NULL){
+ new -> data = val;
+ head2 = new;
+ new -> next = NULL;
+ new -> prev = NULL;
+ }
+ else{
+ new -> data = val;
+ node * temp = head2;
+ while(temp -> next != NULL){
+ temp = temp -> next;
+ }
+ temp -> next = new;
+ new -> prev = temp;
+ new -> next = NULL;
+ }
+}
 void delete(){
-    if(head == NULL){
-        return;
-    }
-    struct Node * temp = head;
-    while(temp -> next -> next != head){
-        temp = temp -> next;
-    }
-    struct Node * temp2 = temp -> next;
-    temp -> next = head;
-    free(temp2);
+ node *temp = head;
+ if(head == NULL){
+ printf("Empty");
+ }
+ else if(head -> next == NULL){
+ free(head);
+ head = NULL;
+ }
+ else{
+ while(temp -> next -> next != NULL){
+ temp = temp -> next;
+ }
+ node *temp2 = temp -> next;
+ temp -> next = NULL;
+ free(temp2);
+ }
 }
-
 void display(){
-    if(head == NULL){
-        printf("List is empty\n");
-    }
-    else{
-        struct Node * temp;
-        temp = head;
-        do{
-            printf("Data: %d\n", temp -> data1);
-            temp = temp -> next;
-        }
-        while(temp -> next != head);
-    }
+ if(head == NULL){
+ printf("Empty");
+ }
+ else{
+ node * temp = head;
+ while(temp -> next != NULL){
+ printf("%d ", temp -> data);
+ temp = temp -> next;
+ } 
+ printf("%d\n", temp -> data);
+ }
 }
-
+void display2(){
+ if(head2 == NULL){
+ printf("Empty");
+ }
+ else{
+ node * temp = head2;
+ while(temp -> next != NULL){
+ printf("%d ", temp -> data);
+ temp = temp -> next;
+ } 
+ printf("%d\n", temp -> data);
+ }
+}
+void sortInsert(int val){
+ node *new = (node *)malloc(sizeof(node));
+ new -> data = val;
+ if(head == NULL){
+ head = new;
+ new -> next = NULL;
+ new -> prev = NULL;
+ }
+ else if(head -> data > val){
+ new -> next = head;
+ head -> prev = NULL;
+ head = new;
+ }
+ else{
+ node * temp = head;
+ while(temp -> next != NULL && temp -> next -> data <= val){
+ temp = temp -> next;
+ }
+ new -> prev = temp;
+ new -> next = temp -> next;
+ temp -> next = new;
+ }
+}
+void sortInsert2(int val){
+ node *new = (node *)malloc(sizeof(node));
+ new -> data = val;
+ if(head2 == NULL){
+ head2 = new;
+ new -> next = NULL;
+ new -> prev = NULL;
+ }
+ else if(head2 -> data > val){
+ new -> next = head2;
+ head2 -> prev = NULL;
+ head2 = new;
+ }
+ else{
+ node * temp = head2;
+ while(temp -> next != NULL && temp -> next -> data <= val){
+ temp = temp -> next;
+ }
+ new -> prev = temp;
+ new -> next = temp -> next;
+ temp -> next = new;
+ }
+}
+void removeDup(){
+ node * temp = head;
+ while(temp -> next -> next != NULL){
+ if(temp -> data == temp -> next -> data){
+ node *temp2 = temp -> next;
+ temp -> next = temp -> next -> next;
+ temp -> next -> prev = temp;
+ free(temp2);
+ }
+ else{
+ temp = temp -> next;
+ }
+ }
+ if(temp -> data == temp -> next-> data){
+ node* temp2 = temp -> next;
+ temp -> next = NULL;
+ free(temp2);
+ }
+}
+void removeDup2(){
+ node * temp = head2;
+ while(temp -> next -> next != NULL){
+ if(temp -> data == temp -> next -> data){
+ node *temp2 = temp -> next;
+ temp -> next = temp -> next -> next;
+ temp -> next -> prev = temp;
+ free(temp2);
+ }
+ else{
+ temp = temp -> next;
+ }
+ }
+ if(temp -> data == temp -> next-> data){
+ node* temp2 = temp -> next;
+ temp -> next = NULL;
+ free(temp2);
+ }
+}
+void join(){
+ node *temp = head2;
+ while(temp -> next != NULL){
+ sortInsert(temp -> data);
+ temp = temp -> next;
+ }
+ while(temp -> prev != NULL){
+ node *temp2 = temp;
+ temp = temp -> prev;
+ temp -> next = NULL;
+ free(temp2);
+ }
+ free(temp);
+}
 int main()
 {
-    printf("Enter the number of petrol pumps\n");
-    int n, p, d;
-	scanf("%d", &n);
-	printf("Enter the amount of petrol followed by distance between petrol pumps\n");
-	for(int i=1;i<=n;i++)
-	{	scanf("%d %d", &p, &d);
-		insert(p, d);
-	}
-	int flag=0, i=1, cap=0;
-	struct Node *current = head;
-	for(i=1;i<=n;i++)
-	{	cap=0;
-		while(current->ind!=i)
-			current=current->next;
-		cap=cap+current->data1;
-		cap=cap-current->data2;
-		if(cap<0)
-			continue;
-		current=current->next;
-		while(current->ind!=i)
-		{	cap=cap+current->data1;
-			cap=cap-current->data2;
-			if(cap<0)
-				break;
-			current=current->next;
-		}
-		if(cap>=0)
-		{   if(flag==0)
-				printf("The correct indices are: ");
-			printf("%d ", i-1);
-			flag=1;
-			}	
-		}
-	if(flag==1)
-		printf("\n");
-	if(flag==0)
-		printf("No possible solutions\n");
-	return 0;
+ int n, m;
+ printf("How many elements do you want in list1: ");
+ scanf("%d", &n);
+ for(int i = 0; i < n; i ++){
+ printf("Enter the element: ");
+ int p;
+ scanf("%d", &p);
+ sortInsert(p);
+ }
+ printf("How many elements do you want in list2: ");
+ scanf("%d", &m);
+ for(int i = 0; i < m; i ++){
+ printf("Enter the element: ");
+ int p;
+ scanf("%d", &p);
+ sortInsert2(p);
+ }
+ printf("List 1: \n");
+ removeDup();
+ display();
+ printf("List 2: \n");
+ removeDup2();
+ display2();
+ printf("Merged list- \n");
+ join();
+ display();
+ return 0;
 }
